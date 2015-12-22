@@ -22,6 +22,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <cutils/properties.h>
 
 #include <log/log.h>
 
@@ -113,11 +114,13 @@ unsigned profile_calc_min_period_size(alsa_device_profile* profile, unsigned sam
     if (profile == NULL) {
         return DEFAULT_PERIOD_SIZE;
     } else {
-        unsigned num_sample_frames = (sample_rate * BUFF_DURATION_MS) / 1000;
+        unsigned buff_duration  = property_get_int32("ro.audio.usb.buff_size_ms", BUFF_DURATION_MS);
+        unsigned num_sample_frames = (sample_rate * buff_duration) / 1000;
+
         if (num_sample_frames < profile->min_period_size) {
             num_sample_frames = profile->min_period_size;
         }
-        return round_to_16_mult(num_sample_frames) * 2;
+        return round_to_16_mult(num_sample_frames);
     }
 }
 
